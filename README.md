@@ -3,6 +3,14 @@
 Server-sent events allow you to open a long held HTTP connection to stream data back to the client.
 On the client you open a connection by creating an `EventSource` with a url to the streaming endpoint.
 
+Article URL: http://www.sitepoint.com/real-time-apps-websockets-server-sent-events
+
+## Requirements
+
+* [Node.js](http://nodejs.org/)
+
+## Installation Steps
+
 ```bash
 npm install
 npm start
@@ -27,3 +35,16 @@ A nice thing about `EventSource` is that it tries to re-establish lost connectio
 - [React to data changes](http://rauchg.com/2014/7-principles-of-rich-web-applications/#react-to-data-changes)
 - [Using server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)
 - [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource)
+
+## License
+
+The MIT License (MIT)
+
+Copyright (c) 2016 SitePoint
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
