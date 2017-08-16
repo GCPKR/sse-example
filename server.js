@@ -7,7 +7,7 @@ const app = express().use(express.static('public'));
 const server = http.createServer(app);
 const clients = [];
 
-server.listen(8080, '127.0.0.1', () => {
+server.listen(8080, '0.0.0.0', () => {
   const sse = new SSE(server);
 
   sse.on('connection', function(client, query) {
