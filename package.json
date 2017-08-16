@@ -1,5 +1,5 @@
 {
-  "name": "server-sent-events",
+  "name": "sse-example",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
