@@ -4,7 +4,7 @@ apps:
     instances: 2
     exec_mode: cluster
     env:
-      PORT: 80
+      PORT: 8080
     error_file: error.log
     out_file: out.log
     merge_logs: true
