@@ -1,5 +1,10 @@
 apps:
   - script   : ./server.js
     name     : 'sse-example'
-    instances: 4
+    instances: 2
     exec_mode: cluster
+    env:
+      PORT: 80
+    error_file: error.log
+    out_file: out.log
+    merge_logs: true
