@@ -1,9 +1,12 @@
 const http = require('http');
 const express = require('express');
+const cors = require('cors');
 const SSE = require('sse');
 const data = require('./data');
 
-const app = express().use(express.static('public'));
+const app = express()
+  .use(cors())
+  .use(express.static('public'));
 const server = http.createServer(app);
 const clients = [];
 
