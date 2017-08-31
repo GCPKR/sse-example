@@ -1,6 +1,6 @@
 const MAX_DATA = 100;
 
-const stream = new EventSource(`/sse?limit=${MAX_DATA}`);
+const stream = new EventSource(/*http://13.124.119.241*/`/sse?limit=${MAX_DATA}`);
 const ctx = document.getElementById('chart').getContext('2d');
 const chart = new Chart(ctx, {
   // The type of chart we want to create
@@ -19,10 +19,10 @@ const chart = new Chart(ctx, {
   },
   data: {
     labels: [],
-    datasets: [{
-      label: 'value',
-      data: [],
-    }]
+    datasets: [
+      { label: 'prediction', data: [] },
+      { label: 'real', data: [] },
+    ]
   }
 });
 
@@ -34,22 +34,46 @@ stream.onerror = function (event) {
   log('Error: ' + JSON.stringify(event));
 };
 
+const processors = {
+  prediction: (serverData) => {
+    const data = chart.data.datasets[0].data;
+    const labels = chart.data.labels;
+
+    serverData.forEach((newData) => {
+      data.push(newData.value);
+      labels.push(newData.timestamp);
+    });
+
+    if (data.length > MAX_DATA) {
+      data.splice(0, data.length - MAX_DATA);
+      labels.shift();
+    }
+    chart.update();
+  },
+  real: (serverData) => {
+    const data = chart.data.datasets[1].data;
+    const labels = chart.data.labels;
+
+    serverData.forEach((newData) => {
+      data.push(newData.value);
+      //labels.push(newData.timestamp);
+    });
+
+    if (data.length > MAX_DATA) {
+      data.splice(0, data.length - MAX_DATA);
+      //labels.shift();
+    }
+    chart.update();
+  },
+};
+
+
 stream.onmessage = function (event) {
   const serverData = JSON.parse(event.data);
+  const eventName = serverData.eventName;
 
-  const data = chart.data.datasets[0].data;
-  const labels = chart.data.labels;
+  processors[eventName](serverData.data);
 
-  serverData.forEach((newData) => {
-    data.push(newData.value);
-    labels.push(newData.timestamp);
-  });
-
-  if (data.length > MAX_DATA) {
-    data.splice(0, data.length - MAX_DATA);
-    labels.shift();
-  }
-  chart.update();
   log('Received Message: ' + event.data);
 };
 

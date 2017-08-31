@@ -5,46 +5,66 @@ const data = require('./data');
 
 const app = express().use(express.static('public'));
 const server = http.createServer(app);
-const clients = [];
 
 const port = process.env.PORT || 8080;
 
-server.listen(port, '0.0.0.0', () => {
-  const sse = new SSE(server);
+const DEFAULT_LIMIT = 100;
 
-  sse.on('connection', function(client, query) {
-    clients.push(client);
-    console.log('Opened connection 🎉');
+class SSEEndpoint {
+  constructor(server, path) {
+    this.server = server;
+    this.path = path;
+    this.clients = [];
+    this.generators = [];
+  }
 
-    let limit = 100;
-    if (query && query.limit && !isNaN(query.limit)) {
-      limit = parseInt(query.limit, 10);
-    }
+  start() {
+    this.sse = new SSE(this.server, { path: this.path });
+    this.sse.on('connection', (client, query) => {
+      this.clients.push(client);
+      console.log(`Opened connection 🎉: ${this.path}`);
 
-    const json = JSON.stringify(data.get(limit)); // Initial data
-    client.send(json);
-    console.log('Sent: ' + json);
+      let limit = DEFAULT_LIMIT;
+      if (query && query.limit && !isNaN(query.limit)) {
+        limit = parseInt(query.limit, 10);
+      }
 
-    client.on('close', function() {
-      clients.splice(clients.indexOf(client), 1);
-      console.log('Closed connection 😱');
+      // send initial data
+      this.generators.forEach((meta) => this.sendData(meta.event, meta.generator, limit));
+
+      client.on('close', () => {
+        this.clients.splice(this.clients.indexOf(client), 1);
+        console.log(`Closed connection 😱: ${this.path}`);
+      });
     });
-  });
+
+    this.generators.forEach((meta) => {
+      setInterval(() => this.sendData(meta.event, meta.generator), meta.interval);
+    });
+  }
+
+  addDataGenerator(eventName, generator, interval = 500) {
+    this.generators.push({ event: eventName, generator, interval });
+  }
+
+  sendData(eventName, generator, limit = 1) {
+    const data = generator.get(limit);
+    const json = JSON.stringify({ eventName, data });
+    this.clients.forEach((client) => {
+      client.send(json);
+      console.log(`Sent: ${this.path}: ${json}`);
+    });
+  }
+}
+
+server.listen(port, '0.0.0.0', () => {
+  const sse = new SSEEndpoint(server, '/sse');
+  sse.addDataGenerator('prediction', data);
+  sse.addDataGenerator('real', data);
+  sse.start();
 });
 
-
-const broadcast = () => {
-  const json = JSON.stringify(data.get());
-
-  clients.forEach(function(stream) {
-    stream.send(json);
-    console.log('Sent: ' + json);
-  });
-};
-setInterval(broadcast, 500);
-
 // can receive from the client with standard http and broadcast
-
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.post('/api', (req, res) => {
