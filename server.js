@@ -2,6 +2,7 @@ const http = require('http');
 const express = require('express');
 const SSE = require('sse');
 const data = require('./data');
+const candleData = require('./candle-data');
 
 const app = express().use(express.static('public'));
 const server = http.createServer(app);
@@ -49,10 +50,10 @@ class SSEEndpoint {
 
   sendData(eventName, generator, limit = 1) {
     const data = generator.get(limit);
-    const json = JSON.stringify({ eventName, data });
+    const json = JSON.stringify(data);
     this.clients.forEach((client) => {
-      client.send(json);
-      console.log(`Sent: ${this.path}: ${json}`);
+      client.send(eventName, json);
+      console.log(`Sent: ${this.path}: ${eventName} ${json}`);
     });
   }
 }
@@ -61,6 +62,7 @@ server.listen(port, '0.0.0.0', () => {
   const sse = new SSEEndpoint(server, '/sse');
   sse.addDataGenerator('prediction', data);
   sse.addDataGenerator('real', data);
+  sse.addDataGenerator('candle', candleData);
   sse.start();
 });
 
